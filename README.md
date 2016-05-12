@@ -2,22 +2,32 @@
 
 # Project Title
 
-Raspberry Pi uploads interesting photos to a GAE hosted web-site
+Raspberry Pi(s) upload interesting photos to a GAE hosted web-site
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get a copy of the project up and running on your local machine for development and testing purposes. The GAE code is loaded to Google's Cloud, the Raspberyr Pi code is downloaded to the Pi dynamically through the web-app
+supporting local machine development for both components.
 
 ### Prerequisities
 
 Raspberry Pi with camera module
-  - standard sofwtare
-  - open CV
+  - standard software
+  - virtualenv
+  - opencv
+  
+```
+workon cv
+...
+```
 
-Google App Engine Accoun and a project
+Google App Engine Account and a project_id
+  - At present, at hobby/home leve volumes, this does not need to be a paid account
+  - google cloud command-line tools installed
+  - cloudstorage module must be installed separately
 
 ```
-example here
+appcfg.py -A project_id -V v1 update gae/
 ```
 
 ### Installing
@@ -78,13 +88,11 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Thomas Ryan** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Thomas Ryan** - *Initial work* - 
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 ## License
-
-# This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 
