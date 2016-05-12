@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if session.admin_logged_in %}
+    <form action="{{ url_for('upload_image') }}"
+            enctype="multipart/form-data"
+            method="post">
+        <div><label>Image:</label></div>
+        <div><input type="file" name="img"/></div>
+        <div><input type="submit" value="Upload"></div>
+    </form>
+  {% else %}
+     Must be logged in as administrator to upload pictures manually.
+  {% endif %}
+{% endblock %}
