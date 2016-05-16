@@ -17,6 +17,16 @@ Raspberry Pi with camera module
   - opencv
   
 ```
+install app engine by following https://cloud.google.com/appengine/downloads
+
+
+pip install GoogleAppEngineCloudStorageClient -t <your_app_directory/lib>
+
+
+follow directions in requirements.text
+
+On raspberry pi:
+install opencv
 workon cv
 ...
 ```

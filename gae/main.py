@@ -1,40 +1,33 @@
-"""`main` is the top level module for your Flask application."""
+"""`main` is the top level module for this Flask application."""
 
 import logging
 import os
 import json
+import cgi
+import urllib
+
 
 # Import the Flask Framework
 from flask import Flask
 from flask import request, session, g, redirect, url_for, abort, render_template, flash
 
-# Google specific modules
+# import Google specific modules
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from google.appengine.api import app_identity
 from google.appengine.ext import blobstore    # not using blob storage, but are using blob API on GCS (well, that's the plan)
 from google.appengine.api import images
 
-
-import cloudstorage as gcs  # pip installed into app directoy, apparently not a first class citizen quite yet
+import cloudstorage as gcs  # pip installed into app directoy, not a first class citizen quite yet
 
 # GCS bucket suffix, after app name
-APP_DOMAIN='.appspot.com'
+APP_DOMAIN = '.appspot.com'             # GAE convention
+MAX_CONTENT_LENGTH = 8 * 1024 * 1024    # 8 MB max per file uploaded (try to stay in the 'free' billing zone)
 
-# app.config() will find these UPPER_CASE constants and make them available; done by convention.
-SECRET_KEY = 'random development key'  # magically sets Flask secret_key
+# local imports
+from private import flask_secret, white_list, admin_name, admin_password # private constants => .gitignore
 
-# limited to friends and family for now
-# white listing here instead of more general configuration  in app.yaml
-WHITE_LIST= [\
-             ]
-
-# a second layer of login, for internal use
-# this is not the general GAE admin for the application
-ADMIN_NAME="tom"
-PASSWORD="none"
-
-# set up the datastore model
+# set up the datastore models
 
 # used to form a root <kind, id> pair.
 ROOT_INCIDENT_KIND="Incident_Log"  # the base "model"/"kind" (pseudo) for everything
@@ -62,8 +55,11 @@ class Incident(ndb.Model) :
     def clear_log(cls, ancestor_key):
         ndb.delete_multi(cls.query(ancestor=ancestor_key).fetch(keys_only=True))
 
+
+# helper functions
+
 def verified_user(users) :
-    """ verify a user is logged in to Google with a white-listed email address"""
+    """ verify that a user is logged in to Google with a white-listed email address"""
     user = users.get_current_user()
     logging.info( "check user: {} => {}".format( \
                     user.email() if user else "[No User]", \
@@ -71,14 +67,13 @@ def verified_user(users) :
     return user and user.email() in app.config['WHITE_LIST']
 
 
-# I think the line main.app (<this file>.<this symbol>) in app.yaml gets it started right about here 
+# the  main.app enty (<this file>.<this symbol>) in app.yaml gets real work started right about here 
 app = Flask(__name__)
-app.config.from_object(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # 8 MB max per file uploaded
-
-import cgi
-import urllib
-
+app.config.from_object(__name__)            # pulls in UPPER_CASE constants
+app.config['SECRET_KEY'] = flask_secret     # Flask's semi secret_key
+app.config['WHITE_LIST'] = white_list       # simple list of allowed email accounts (gmail authentication), shpuld move to datasotre
+app.config['ADMIN_NAME'] = admin_name       # admin name within this app, not overall GAE admin
+app.config['PASSWORD'] = admin_password     # and the admin password
 
 # Basic user flow 
 # intermediate access rolls back upstream
@@ -98,7 +93,7 @@ import urllib
 def hello():
     """Web login and Return a friendly HTTP greeting."""
 
-    print "at hello"
+    # print "at hello"
     # This reaches out to Google, someday general OAUTH, to ensure a valid gmail account is active
     user = users.get_current_user() 
     if not user :
@@ -106,7 +101,7 @@ def hello():
     print "at hello email is", user.email()
     if user.email() not in app.config['WHITE_LIST'] :
         logging.critical( "Unauthorized access attempt: {}".format(user.email()))
-        return 'Sorry, ' + user.nickname() + '. Try logging out and logging in with an approved gmail address.'
+        return 'Sorry, ' + user.nickname() + '. Try logging out and logging in with a permitted gmail address.'
     else:
         return redirect(url_for('show_entries'))
 
