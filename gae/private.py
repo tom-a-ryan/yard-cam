@@ -1,16 +1,18 @@
+
 # private entries for gae flask main app
 
-# used by Flask session, replace with a different secret
-flask_secret = 'Flask Application Secret'
+# allowed users when authenticated by google
+# TBD should be moved to data store
 
-
-# These should probably be moved to a data store
-
-# allowed users, authenticated by google
-white_list = ['email@gmail.com'
+white_list = [your_email@gmail.com
               ]
 
-# internal to main app, not GAE admin
-# admin can clear images, etc.
-admin_name = 'web_admin'
+# used by Flask session
+flask_secret = 'My Flask Application Secret'
+
+# admin internal to main app, not GAE admin
+# admin righta can clear images, etc. and someday edit white_list...
+
+admin_name = 'admin'
 admin_password = 'change_me'
+
