@@ -6,19 +6,36 @@ Raspberry Pi(s) upload interesting photos to a GAE hosted web-site
 
 ## Getting Started
 
-These instructions will get a copy of the project up and running on your local machine for development and testing purposes. The GAE code is loaded to Google's Cloud, the Raspberyr Pi code is downloaded to the Pi dynamically through the web-app
-supporting local machine development for both components.
+These instructions will get a copy of the project installed on your local machine for development and testing purposes.
+The GAE code is loaded to Google's Cloud, the Raspberyr Pi code is downloaded to the Pi dynamically through the GAE web-app.
 
 ### Prerequisities
+
+Google Cloud Compute
+  - Google App Engine account
+  - Google App Engine project
+  
+Local development machine
+  - Google Cloud Compute tools
+  - Google Cloudstorage library
 
 Raspberry Pi with camera module
   - standard software
   - virtualenv
   - opencv
-  
-```
-install app engine by following https://cloud.google.com/appengine/downloads
 
+### Installing
+
+Google Cloud Compute
+
+
+Install tools by following instrcutions at
+
+```
+https://cloud.google.com/appengine/downloads
+
+```
+Navigae to the console to create <your-project>
 
 pip install GoogleAppEngineCloudStorageClient -t <your_app_directory/lib>
 
@@ -37,14 +54,6 @@ Google App Engine Account and a project_id
   - cloudstorage module must be installed separately
 
 ```
-appcfg.py -A project_id -V v1 update gae/
-```
-
-### Installing
-
-How to get started
-
-Stay what the step will be
 
 ```
 Give the example
@@ -64,10 +73,9 @@ Explain how to run the automated tests for this system
 
 ### Break down into end to end tests
 
-Explain what these tests test and why
-
+Upload a new version to GAE
 ```
-Give an example
+appcfg.py -A project_id -V v1 update gae/
 ```
 
 ### And coding style tests
