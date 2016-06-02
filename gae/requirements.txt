@@ -5,3 +5,6 @@
 #
 # Note: The `lib` directory is added to `sys.path` by `appengine_config.py`.
 Flask==0.10
+
+# we also need Google's gcs libraries; not yet built into gae in a known way?
+# pip install GoogleAppEngineCloudStorageClient -t <your_app_directory/lib>
