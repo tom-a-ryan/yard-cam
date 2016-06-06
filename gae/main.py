@@ -18,7 +18,7 @@ from google.appengine.api import app_identity
 from google.appengine.ext import blobstore    # not using blob storage, but are using blob API on GCS (well, that's the plan)
 from google.appengine.api import images
 
-import cloudstorage as gcs  # pip installed into app directoy, not a first class citizen quite yet
+import cloudstorage as gcs  # pip installed into app directoy/lib, not a first class citizen quite yet
 
 # GCS bucket suffix, after app name
 APP_DOMAIN = '.appspot.com'             # GAE convention
