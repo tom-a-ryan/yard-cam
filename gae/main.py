@@ -20,6 +20,9 @@ from google.appengine.api import images
 
 import cloudstorage as gcs  # pip installed into app directoy/lib, not a first class citizen quite yet
 
+# bring in application support pieces
+import device
+
 # GCS bucket suffix, after app name
 APP_DOMAIN = '.appspot.com'             # GAE convention
 MAX_CONTENT_LENGTH = 8 * 1024 * 1024    # 8 MB max per file uploaded (try to stay in the 'free' billing zone)
@@ -252,6 +255,10 @@ def rcp_get():
 def ping() :
     """ pint test from raspberyy pi"""
     return __name__
+
+@app.rout('/testd')
+def device_test() :
+    device_unit_tests()
 
 
 # only here for general connectivity and health check
