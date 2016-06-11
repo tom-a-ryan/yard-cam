@@ -256,9 +256,9 @@ def ping() :
     """ pint test from raspberyy pi"""
     return __name__
 
-@app.rout('/testd')
+@app.route('/testd')
 def device_test() :
-    device_unit_tests()
+    return device.unit_test_devices()
 
 
 # only here for general connectivity and health check

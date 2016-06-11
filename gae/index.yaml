@@ -10,8 +10,25 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Device
+  ancestor: yes
+  properties:
+  - name: last_ping_time
+
+- kind: Device
+  ancestor: yes
+  properties:
+  - name: last_ping_time
+    direction: desc
+
 - kind: Incident
   ancestor: yes
   properties:
   - name: upload_time
+    direction: desc
+
+- kind: To_Do_Command
+  ancestor: yes
+  properties:
+  - name: queue_time
     direction: desc
