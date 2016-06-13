@@ -201,24 +201,26 @@ def unit_test_devices() :
         assert query.fetch()[0].key == command_two_key, "expected command_two key: " + command_two_key + ", but got: " + query.fetch()[0].key
         assert query.fetch()[0].device == device_two_key, "expected device_two key: " + device_two_key + ", but got: " + query.fetch()[0].device
 
-        print "*** one each == OK **"
-
         # at this point, two devices, two commands, one command per device
         # add command_three for device_two, retrieve and check.
         command_three_key = To_Do_Command.assign_device(queue_id=test_queue_id, device=device_two_key, command="test me third")
 
-        # retrieve all commands in this test queue group (now three)
+        # retrieve all commands in this test queue group (now three); also confirms cls.order
         query = To_Do_Command.find_commands_in_queue(test_queue_id)
         assert len(query.fetch()) == 3, "expected three test commands, but found %d" % len(query.fetch())
-        assert query.fetch()[2].key.id() == command_one_key.id(), "test command key put() does not match test command key fetched"
+        assert query.fetch()[2].key == command_one_key, "expected command_one key: " + command_one_key + ", but got: " + query.fetch()[0].key
         assert query.fetch()[2].device == device_one_key, "expected device one key: " + device_one_key +", but got: " + query.fetch()[0].device
 
+        # and then the two mst recent, both device_two; 
         query = To_Do_Command.find_commands_for_device(device_two_key)
-##        for cmd_key in query.fetch(20) :
-##            print "found command", cmd_key 
         assert len(query.fetch()) == 2, "expected 2 commands for test device_two but found %d" % len(query.fetch())
+        assert query.fetch()[0].key == command_three_key, "expected command_three key: " + command_three_key + ", but got: " + query.fetch()[0].key
+        assert query.fetch()[0].device == device_two_key, "expected device two key: " + device_two_key +", but got: " + query.fetch()[0].device
+        assert query.fetch()[1].key == command_two_key, "expected command_two key: " + command_two_key + ", but got: " + query.fetch()[0].key
+        assert query.fetch()[1].device == device_two_key, "expected device two key: " + device_two_key +", but got: " + query.fetch()[0].device
+        
 
-        # clean up where ancesteors are <kind>.<test id>
+        # clean up entities with ancesteors  == <named kind>.<test id>
         Device.clear_group(test_device_group_id)
         To_Do_Command.clear_queue(test_queue_id)
 
