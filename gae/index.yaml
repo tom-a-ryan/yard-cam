@@ -28,6 +28,12 @@ indexes:
     direction: desc
 
 - kind: To_Do_Command
+  properties:
+  - name: device
+  - name: queue_time
+    direction: desc
+
+- kind: To_Do_Command
   ancestor: yes
   properties:
   - name: queue_time
