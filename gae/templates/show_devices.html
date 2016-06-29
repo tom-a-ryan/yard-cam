@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+  <ul class=device_list>
+  {% for device in devices %}
+    <li>{{ device.kind }} {{ device.ndb_id }} {{ device.last_ping_time }}  {{ device.real_world_id }}
+  {% else %}
+    <li><em>Unbelievable.  No devices here so far</em>
+  {% endfor %}
+  </ul>
+{% endblock %}

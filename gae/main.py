@@ -21,7 +21,7 @@ from google.appengine.api import images
 import cloudstorage as gcs  # pip installed into app directoy/lib, not a first class citizen quite yet
 
 # bring in application support pieces
-import device
+from device import Device, unit_test_devices
 
 # GCS bucket suffix, after app name
 APP_DOMAIN = '.appspot.com'             # GAE convention
@@ -118,6 +118,7 @@ def show_entries():
     entries = [dict(title = incident.reason, 
                     image_name = incident.image_name,
                     image_url = images.get_serving_url(incident.gcs_blob_image_key)) for incident in incidents]
+    # at some point we need to fetch_page() and paginate
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/upload')
@@ -213,7 +214,7 @@ def init() :
 
 @app.route('/rcp')
 def rcp_input() :
-    """ Display a form to gather remote (to devie) commands and parameters"""
+    """ Display a form to gather remote (to device) commands and parameters"""
     if not verified_user(users) :
         return redirect(url_for('hello'))
     if not session.get('admin_logged_in') :
@@ -251,14 +252,32 @@ def rcp_get():
         session['rcp']['sent'] += 1
         return json.dumps(session['rcp'])
 
-@app.route('/ping')
+@app.route('/ping') 
 def ping() :
-    """ pint test from raspberyy pi"""
+    """ ping  from decice - send back command and conrol info"""
+    print request.args
+    
     return __name__
 
+@app.route('/devices')
+def show_devices() :
+    if not verified_user(users) :
+        return redirect(url_for('hello'))
+    
+    # "select all" ndb query from Devices
+    # no need to paginate
+    device_query = Device.find_all_devices()
+    device_list = [dict(kind = device.key.kind(),
+                        ndb_id = device.key.id(),
+                        last_ping_time = device.last_ping_time,
+                        real_world_id = device.external_id
+                        ) for device in device_query]
+    return render_template('show_devices.html', devices=device_list)
+
+    
 @app.route('/testd')
 def device_test() :
-    return device.unit_test_devices()
+    return unit_test_devices()
 
 
 # only here for general connectivity and health check

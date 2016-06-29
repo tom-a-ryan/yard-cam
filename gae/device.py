@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 """`device` abstracts device data along with 'to do' queue per device"""
 
+# performance note - grouping by using ancestor <kind><id> creates ndb 'groups', which may limit performance.
+# the answer will be to move the ancestor <id> for each <kind> inot a ".group" property
+# and thus flatten all entities to have them selves as a "root" (group/tree)
+# device_grpup_key() is the factored out and into a property.
+
+
 import logging
 import os
+import time
 import json
 import cgi
 import urllib
@@ -43,6 +50,10 @@ class Device(ndb.Model) :
     # entities should have an ancestor: e.g., a device_group_key()
     # implied: ndb Device.id is ssigned by GCS
     # implied: to do queue's added later, Queued items point to devices.
+
+    @classmethod 
+    def find_all_devices(cls) :
+        return cls.query().order(-cls.last_ping_time)
 
     # return the devices in the specified group
     @classmethod
@@ -105,9 +116,7 @@ class To_Do_Command(ndb.Model) :
             cmd.binary_parameter = kwargs['binary']
         status = kwargs['status'] if 'status' in kwargs else 'pending'
         command_key = cmd.put()
-        print "added command:", command_key, "to device:", cmd.device
-##        print "   kind", command_key.kind()
-##        print "     id", command_key.id()
+        # print "added command:", command_key, "to device:", cmd.device
         return command_key
 
     @classmethod
@@ -148,12 +157,17 @@ def unit_test_devices() :
         # create device_one
         test_device_one = Device(parent=test_device_group_key, external_id="test device one")
         device_one_key = test_device_one.put()
+        time.sleep(2)
 
-        query = Device.find_devices_in_group(test_device_group_id)
+        # check find all
+        query = Device.find_all_devices()
+        assert len(query.fetch()) == 1, "expected 'find all' to find test_devce_one, but found %d" % len(query.fetch())
+        assert query.fetch()[0].key == device_one_key, "test device key put() does not match test device key fetched"
 
         # retrive device_one, assumes fetch() is idempotent
+        query = Device.find_devices_in_group(test_device_group_id)
         assert len(query.fetch()) == 1, "expected one test device, but found %d" % len(query.fetch())
-        assert query.fetch()[0].key.id() == device_one_key.id(), "test device key put() does not match test device key fetched"
+        assert query.fetch()[0].key.id() == device_one_key.id(), "test device key.id put() does not match test device key fetched"
 
         # check default queue group <kind>,<id>
         default_queue_key = queue_key()
@@ -189,7 +203,9 @@ def unit_test_devices() :
         # create device_two and add command_two to it
         test_device_two = Device(parent=test_device_group_key, external_id="test device two")
         device_two_key = test_device_two.put()
+        time.sleep(1)
         command_two_key = To_Do_Command.assign_device(queue_id=test_queue_id, device=device_two_key, command="test me too")
+        time.sleep(1)
 
         # retrieve all commands in this test queue group (now there are two)
         query = To_Do_Command.find_commands_in_queue(test_queue_id)
@@ -204,6 +220,7 @@ def unit_test_devices() :
         # at this point, two devices, two commands, one command per device
         # add command_three for device_two, retrieve and check.
         command_three_key = To_Do_Command.assign_device(queue_id=test_queue_id, device=device_two_key, command="test me third")
+        time.sleep(1)
 
         # retrieve all commands in this test queue group (now three); also confirms cls.order
         query = To_Do_Command.find_commands_in_queue(test_queue_id)
@@ -219,10 +236,9 @@ def unit_test_devices() :
         assert query.fetch()[1].key == command_two_key, "expected command_two key: " + command_two_key + ", but got: " + query.fetch()[0].key
         assert query.fetch()[1].device == device_two_key, "expected device two key: " + device_two_key +", but got: " + query.fetch()[0].device
         
-
         # clean up entities with ancesteors  == <named kind>.<test id>
-        Device.clear_group(test_device_group_id)
-        To_Do_Command.clear_queue(test_queue_id)
+##        Device.clear_group(test_device_group_id)
+##        To_Do_Command.clear_queue(test_queue_id)
 
     except AssertionError, error :
         result = error.args[0]
